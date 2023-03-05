@@ -1,6 +1,7 @@
 # Boostup's Leaked Boost Bot
 
-DO NOT MESSAGE ME FOR HELP, I **WILL** IGNORE YOU
+DO NOT MESSAGE ME FOR HELP, I **WILL** IGNORE YOU.
+
 Skids are selling this bot which was leaked by someone. Do not buy this from anyone, thanks.
 
 
