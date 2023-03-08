@@ -1,4 +1,4 @@
-# Boostup's Leaked Boost Bot
+# A Leaked Boost Bot
 
 DO NOT MESSAGE ME FOR HELP, I **WILL** IGNORE YOU.
 
