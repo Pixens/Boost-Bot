@@ -5,7 +5,11 @@ from threading import Thread
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from boosting import *
 from sellpass import SellPass
+import inspect
+from bot import fingerprint_modification
 
+
+app = flask.Flask(__name__)
 orders = []
 
 config = json.load(open("config.json", encoding="utf-8"))
@@ -379,11 +383,18 @@ def start_sellpass(received):
 
 
 def run():
-    app.run(host="0.0.0.0", port="6969")
+    if __name__ == '__main__':
+    # Debug/Development
+    # app.run(debug=True, host="0.0.0.0", port="5000")
+    # Production
+        http_server = WSGIServer(('', 6969), app)
+        http_server.serve_forever()
     
     
 def keep_alive():
     t = Thread(target=run)
     t.start()
-    
+
 fingerprint_modification()
+    
+
